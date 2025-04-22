@@ -82,6 +82,28 @@ carregarTabelaPagamentos();
         </table>
       </div>
     </section>
+
+  function registrarPagamento(id) {
+    const valor = prompt('Informe o valor recebido (R$):');
+    const valorFloat = parseFloat(valor.replace(',', '.'));
+  
+    if (isNaN(valorFloat) || valorFloat <= 0) {
+      alert('Valor inválido!');
+      return;
+    }
+  
+    fetch('../backend/registrar_pagamento.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ colaborador_id: id, valor: valorFloat })
+    })
+      .then(res => res.json())
+      .then(() => {
+        alert('Pagamento registrado!');
+        carregarTabelaPagamentos();
+      });
+  }
+    
   </script>
 </body>
 </html>
