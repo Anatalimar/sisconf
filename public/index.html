@@ -1,0 +1,51 @@
+// Carrega setores
+fetch('backend/get_setores.php')
+  .then(res => res.json())
+  .then(data => {
+    const setorSelect = document.getElementById('setor');
+    data.forEach(setor => {
+      const opt = document.createElement('option');
+      opt.value = setor;
+      opt.textContent = setor;
+      setorSelect.appendChild(opt);
+    });
+  });
+
+// Carrega colaboradores após escolher setor
+document.getElementById('setor').addEventListener('change', function () {
+  const setor = this.value;
+  fetch(`backend/get_colaboradores.php?setor=${encodeURIComponent(setor)}`)
+    .then(res => res.json())
+    .then(data => {
+      const colaboradorSelect = document.getElementById('colaborador');
+      colaboradorSelect.innerHTML = '<option value="">Selecione o nome</option>';
+      data.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.nome;
+        colaboradorSelect.appendChild(opt);
+      });
+    });
+});
+
+// Submissão do formulário
+document.getElementById('confirmacaoForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  const body = {
+    colaborador_id: document.getElementById('colaborador').value,
+    vai_participar: document.getElementById('participar').value,
+    acompanhantes: document.getElementById('acompanhantes').value
+  };
+
+  fetch('backend/confirmar.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert('Confirmação salva com sucesso!');
+      document.getElementById('confirmacaoForm').reset();
+      document.getElementById('acompanhantesWrapper').classList.add('hidden');
+    });
+});
