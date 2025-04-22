@@ -18,15 +18,26 @@ CREATE TABLE confirmacoes (
 );
 
 -- Parcelas de pagamento
-CREATE TABLE pagamentos (
+CREATE TABLE parcelas (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    colaborador_id INT NOT NULL,
-    parcela_num INT NOT NULL,
-    valor DECIMAL(10,2) NOT NULL,
-    data_pagamento DATETIME DEFAULT CURRENT_TIMESTAMP,
+    colaborador_id INT NOT NULL, -- Relacionamento com a tabela de colaboradores
+    valor DECIMAL(10, 2) NOT NULL, -- Valor da parcela
+    data_vencimento DATE NOT NULL, -- Data de vencimento
+    data_pagamento DATE NULL, -- Data do pagamento (se já pago)
+    status ENUM('pendente', 'pago') DEFAULT 'pendente', -- Status da parcela
     FOREIGN KEY (colaborador_id) REFERENCES colaboradores(id) ON DELETE CASCADE
 );
 
+-- Pagamentos das parcelas
+CREATE TABLE pagamentos_parcelas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    parcela_id INT NOT NULL, -- Relacionamento com a tabela de parcelas
+    valor_pago DECIMAL(10, 2) NOT NULL, -- Valor pago na parcela
+    data_pagamento DATE NOT NULL, -- Data do pagamento
+    FOREIGN KEY (parcela_id) REFERENCES parcelas(id) ON DELETE CASCADE
+);
+
+-- Tabela de usuários administradores (login)
 CREATE TABLE usuarios_admin (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -43,4 +54,13 @@ CREATE TABLE configuracoes_evento (
     imagem1 VARCHAR(255),
     imagem2 VARCHAR(255),
     imagem3 VARCHAR(255)
+);
+
+-- Log de ações (para registrar atividades dos administradores)
+CREATE TABLE logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL, -- Relacionamento com a tabela de usuários administradores
+    acao VARCHAR(255) NOT NULL,
+    data DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios_admin(id) ON DELETE CASCADE
 );
