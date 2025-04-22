@@ -28,29 +28,60 @@
     <a href="../backend/logout.php" class="text-blue-600 underline">Sair</a>
   </div>
 
+function carregarTabelaPagamentos() {
+  fetch('../backend/get_pagamentos.php')
+    .then(res => res.json())
+    .then(dados => {
+      const tbody = document.getElementById('tabelaPagamentos');
+      tbody.innerHTML = '';
+
+      dados.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="p-2 border">${item.nome}</td>
+          <td class="p-2 border">${item.setor}</td>
+          <td class="p-2 border">${item.participa}</td>
+          <td class="p-2 border">${item.acompanhantes}</td>
+          <td class="p-2 border">R$ ${item.total}</td>
+          <td class="p-2 border">R$ ${item.pago}</td>
+          <td class="p-2 border">R$ ${item.faltando}</td>
+          <td class="p-2 border">
+            <button onclick="registrarPagamento(${item.id})" class="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700">
+              Registrar
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    });
+}
+
+carregarTabelaPagamentos();
+
+  
   <script>
     <section class="bg-white rounded shadow p-4">
-  <h2 class="text-lg font-semibold mb-4">Controle de Pagamentos</h2>
-  <div class="overflow-x-auto">
-    <table class="min-w-full text-sm text-left border">
-      <thead class="bg-gray-100">
-        <tr>
-          <th class="p-2 border">Colaborador</th>
-          <th class="p-2 border">Setor</th>
-          <th class="p-2 border">Participa?</th>
-          <th class="p-2 border">Acompanhantes</th>
-          <th class="p-2 border">Total (R$)</th>
-          <th class="p-2 border">Pago (R$)</th>
-          <th class="p-2 border">Falta (R$)</th>
-          <th class="p-2 border">Ação</th>
-        </tr>
-      </thead>
-      <tbody id="tabelaPagamentos">
-        <!-- Carregado dinamicamente -->
-      </tbody>
-    </table>
-  </div>
-</section>
+      <h2 class="text-lg font-semibold mb-4">Controle de Pagamentos</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm text-left border">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="p-2 border">Colaborador</th>
+              <th class="p-2 border">Setor</th>
+              <th class="p-2 border">Participa?</th>
+              <th class="p-2 border">Acompanhantes</th>
+              <th class="p-2 border">Total (R$)</th>
+              <th class="p-2 border">Pago (R$)</th>
+              <th class="p-2 border">Falta (R$)</th>
+              <th class="p-2 border">Ação</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaPagamentos">
+            <!-- Carregado dinamicamente -->
+          </tbody>
+        </table>
+      </div>
+    </section>
   </script>
 </body>
 </html>
