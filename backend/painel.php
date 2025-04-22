@@ -29,7 +29,28 @@
   </div>
 
   <script>
-    // Aqui podemos buscar estatísticas no futuro com PHP
+    <section class="bg-white rounded shadow p-4">
+  <h2 class="text-lg font-semibold mb-4">Controle de Pagamentos</h2>
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm text-left border">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="p-2 border">Colaborador</th>
+          <th class="p-2 border">Setor</th>
+          <th class="p-2 border">Participa?</th>
+          <th class="p-2 border">Acompanhantes</th>
+          <th class="p-2 border">Total (R$)</th>
+          <th class="p-2 border">Pago (R$)</th>
+          <th class="p-2 border">Falta (R$)</th>
+          <th class="p-2 border">Ação</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaPagamentos">
+        <!-- Carregado dinamicamente -->
+      </tbody>
+    </table>
+  </div>
+</section>
   </script>
 </body>
 </html>
