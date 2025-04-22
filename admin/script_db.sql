@@ -27,12 +27,12 @@ CREATE TABLE pagamentos (
     FOREIGN KEY (colaborador_id) REFERENCES colaboradores(id) ON DELETE CASCADE
 );
 
--- Usuários administradores (para login no sistema)
 CREATE TABLE usuarios_admin (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     senha_hash VARCHAR(255) NOT NULL,
+    perfil ENUM('admin', 'financeiro') NOT NULL DEFAULT 'financeiro',
     criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
