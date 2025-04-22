@@ -63,6 +63,12 @@ carregarTabelaPagamentos();
     <section class="bg-white rounded shadow p-4">
       <h2 class="text-lg font-semibold mb-4">Controle de Pagamentos</h2>
       <div class="overflow-x-auto">
+      <div class="flex flex-col md:flex-row gap-4 mb-4">
+        <input type="text" id="filtroNome" placeholder="Buscar por nome..." class="px-4 py-2 border rounded w-full md:w-1/2" oninput="filtrarTabela()">
+        <select id="filtroSetor" class="px-4 py-2 border rounded w-full md:w-1/2" onchange="filtrarTabela()">
+          <option value="">Todos os setores</option>
+        </select>
+      </div>
         <table class="min-w-full text-sm text-left border">
           <thead class="bg-gray-100">
             <tr>
