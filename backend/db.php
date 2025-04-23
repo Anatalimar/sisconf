@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$dbname = 'confraternizacao';
+$dbname = 'sisconfi';
 $user = 'root';
 $pass = '';
 

@@ -9,16 +9,34 @@ if (!isset($_SESSION['admin_id'])) {
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Administrativo - DETIN</title>
+  <title>Painel Administrativo - SISCONF</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
-  <div class="max-w-7xl mx-auto p-6">
-    <h1 class="text-2xl font-bold mb-6">Painel Administrativo - DETIN</h1>
 
+  <!-- Navbar -->
+  <nav class="bg-blue-900 text-white shadow mb-6">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center">
+      <div class="flex gap-4 items-center">
+        <h1 class="text-xl font-bold mr-4">SISCONF - DETIN</h1>
+        <button onclick="carregarConteudo('inicio')" class="hover:bg-blue-800 px-3 py-2 rounded">Início</button>
+        <button onclick="carregarConteudo('../public/get_participe.html')" class="hover:bg-blue-800 px-3 py-2 rounded">Confirmação</button>
+        <button onclick="carregarConteudo('admin_parcelas.php')" class="hover:bg-blue-800 px-3 py-2 rounded">Gestão de Parcelas</button>
+        <button onclick="carregarConteudo('usuarios.php')" class="hover:bg-blue-800 px-3 py-2 rounded">Gerenciar Usuários</button>
+      </div>
+      <div>
+        <a href="logout.php" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm">Sair</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Conteúdo dinâmico -->
+  <div id="conteudoPrincipal" class="max-w-7xl mx-auto p-6">
+    <h2 class="text-2xl font-bold mb-6">Painel Administrativo - DETIN</h2>
+
+    <!-- Conteúdo inicial: Painel de estatísticas -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <!-- Cards de estatísticas -->
       <div class="bg-white rounded shadow p-4">
         <p class="text-sm text-gray-500">Total de Confirmados</p>
         <p class="text-2xl font-bold" id="totalConfirmados">0</p>
@@ -33,7 +51,7 @@ if (!isset($_SESSION['admin_id'])) {
       </div>
     </div>
 
-    <!-- Filtros -->
+    <!-- Filtros para a tabela -->
     <div class="flex flex-col md:flex-row gap-4 mb-4">
       <input type="text" id="filtroNome" placeholder="Buscar por nome..." class="px-4 py-2 border rounded w-full md:w-1/2" oninput="filtrarTabela()">
       <select id="filtroSetor" class="px-4 py-2 border rounded w-full md:w-1/2" onchange="filtrarTabela()">
@@ -41,12 +59,10 @@ if (!isset($_SESSION['admin_id'])) {
       </select>
     </div>
 
-    <!-- Exportação -->
     <button onclick="window.location.href='../backend/exportar_excel.php'" class="mb-4 px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700">
       Exportar Excel
     </button>
 
-    <!-- Tabela de Pagamentos -->
     <section class="bg-white rounded shadow p-4">
       <h2 class="text-lg font-semibold mb-4">Controle de Pagamentos</h2>
       <div class="overflow-x-auto">
@@ -81,6 +97,43 @@ if (!isset($_SESSION['admin_id'])) {
   <script>
     let dadosOriginal = [];
 
+    // Função para carregar o conteúdo dinamicamente
+    function carregarConteudo(arquivo) {
+      if (arquivo === 'inicio') {
+        location.reload();
+        return;
+      }
+
+      fetch(arquivo)
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`Erro ao carregar o arquivo ${arquivo}`);
+          }
+          return res.text();
+        })
+        .then(html => {
+          document.getElementById('conteudoPrincipal').innerHTML = html;
+
+          // Carregar o script 'usuarios.js' se estiver carregando 'usuarios.php'
+          if (arquivo === 'usuarios.php') {
+            const script = document.createElement('script');
+            script.src = 'usuarios.js';  // Certifique-se de que o caminho está correto
+            document.body.appendChild(script);
+            
+            // Espera o script ser carregado e então executa funções necessárias
+            script.onload = () => {
+              // Função de inicialização específica do script de usuários (se necessário)
+              carregarUsuarios();  // Exemplo, se você precisar chamar essa função diretamente
+            };
+          }
+        })
+        .catch(err => {
+          console.error('Erro ao carregar o conteúdo:', err);
+          alert('Erro ao carregar o conteúdo. Verifique o console para mais detalhes.');
+        });
+    }
+
+    // Função para carregar e filtrar os pagamentos
     function carregarTabelaPagamentos() {
       fetch('../backend/get_pagamentos.php')
         .then(res => res.json())
@@ -94,6 +147,7 @@ if (!isset($_SESSION['admin_id'])) {
     function preencherSetores(dados) {
       const setores = [...new Set(dados.map(d => d.setor))];
       const select = document.getElementById('filtroSetor');
+      select.innerHTML = '<option value="">Todos os setores</option>';
       setores.forEach(setor => {
         const opt = document.createElement('option');
         opt.value = setor;
@@ -103,8 +157,8 @@ if (!isset($_SESSION['admin_id'])) {
     }
 
     function filtrarTabela() {
-      const nomeFiltro = document.getElementById('filtroNome').value.toLowerCase();
-      const setorFiltro = document.getElementById('filtroSetor').value;
+      const nomeFiltro = document.getElementById('filtroNome')?.value.toLowerCase() || '';
+      const setorFiltro = document.getElementById('filtroSetor')?.value || '';
 
       const filtrados = dadosOriginal.filter(item =>
         item.nome.toLowerCase().includes(nomeFiltro) &&
@@ -112,6 +166,7 @@ if (!isset($_SESSION['admin_id'])) {
       );
 
       const tbody = document.getElementById('tabelaPagamentos');
+      if (!tbody) return;
       tbody.innerHTML = '';
 
       filtrados.forEach(item => {
@@ -131,12 +186,19 @@ if (!isset($_SESSION['admin_id'])) {
         `;
         tbody.appendChild(tr);
       });
+
+      const totalConfirmados = filtrados.filter(f => f.participa === 'Sim').length;
+      const totalPagamentos = filtrados.reduce((acc, cur) => acc + parseFloat(cur.pago), 0);
+      const totalPendentes = filtrados.filter(f => parseFloat(f.faltando) > 0).length;
+
+      document.getElementById('totalConfirmados').textContent = totalConfirmados;
+      document.getElementById('totalPagamentos').textContent = `R$ ${totalPagamentos.toFixed(2)}`;
+      document.getElementById('totalPendentes').textContent = totalPendentes;
     }
 
     function registrarPagamento(id) {
       const valor = prompt('Informe o valor recebido (R$):');
       const valorFloat = parseFloat(valor.replace(',', '.'));
-
       if (isNaN(valorFloat) || valorFloat <= 0) {
         alert('Valor inválido!');
         return;
@@ -147,11 +209,11 @@ if (!isset($_SESSION['admin_id'])) {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ colaborador_id: id, valor: valorFloat })
       })
-        .then(res => res.json())
-        .then(() => {
-          alert('Pagamento registrado!');
-          carregarTabelaPagamentos();
-        });
+      .then(res => res.json())
+      .then(() => {
+        alert('Pagamento registrado!');
+        carregarTabelaPagamentos();
+      });
     }
 
     function abrirHistorico(id, nome) {
@@ -173,5 +235,6 @@ if (!isset($_SESSION['admin_id'])) {
 
     carregarTabelaPagamentos();
   </script>
+
 </body>
 </html>

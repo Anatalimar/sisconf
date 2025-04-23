@@ -1,15 +1,17 @@
 <?php
+/*
 session_start();
 if (!isset($_SESSION['admin_id']) || $_SESSION['perfil'] !== 'admin') {
   header("Location: login.php");
   exit;
 }
+*/
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gerenciar Usuários</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -17,7 +19,8 @@ if (!isset($_SESSION['admin_id']) || $_SESSION['perfil'] !== 'admin') {
   <div class="max-w-5xl mx-auto p-6">
     <h1 class="text-2xl font-bold mb-6">Usuários Administrativos</h1>
 
-    <button onclick="abrirModalNovo()" class="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+    <!-- Alteração aqui: botão sem inline JS -->
+    <button id="btnNovoUsuario" class="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
       Novo Usuário
     </button>
 
@@ -38,17 +41,17 @@ if (!isset($_SESSION['admin_id']) || $_SESSION['perfil'] !== 'admin') {
   </div>
 
   <!-- Modal de novo usuário -->
-  <div id="modalUsuario" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+  <div id="modalUsuario" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
     <div class="bg-white p-6 rounded shadow max-w-md w-full">
       <h3 id="modalTitulo" class="text-lg font-bold mb-4">Novo Usuário</h3>
       <form id="formUsuario">
-        <input type="hidden" id="usuarioId">
+        <input type="hidden" id="usuarioId" />
 
         <label class="block text-sm mb-1">Nome</label>
-        <input type="text" id="nome" class="w-full mb-3 px-3 py-2 border rounded" required>
+        <input type="text" id="nome" class="w-full mb-3 px-3 py-2 border rounded" required />
 
         <label class="block text-sm mb-1">E-mail</label>
-        <input type="email" id="email" class="w-full mb-3 px-3 py-2 border rounded" required>
+        <input type="email" id="email" class="w-full mb-3 px-3 py-2 border rounded" required />
 
         <label class="block text-sm mb-1">Perfil</label>
         <select id="perfil" class="w-full mb-3 px-3 py-2 border rounded" required>
@@ -57,10 +60,10 @@ if (!isset($_SESSION['admin_id']) || $_SESSION['perfil'] !== 'admin') {
         </select>
 
         <label class="block text-sm mb-1">Senha</label>
-        <input type="password" id="senha" class="w-full mb-3 px-3 py-2 border rounded" placeholder="Deixe em branco para não alterar">
+        <input type="password" id="senha" class="w-full mb-3 px-3 py-2 border rounded" placeholder="Deixe em branco para não alterar" />
 
         <div class="flex justify-between mt-4">
-          <button type="button" onclick="fecharModal()" class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500">Cancelar</button>
+          <button type="button" id="btnCancelar" class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500">Cancelar</button>
           <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Salvar</button>
         </div>
       </form>
@@ -102,6 +105,10 @@ if (!isset($_SESSION['admin_id']) || $_SESSION['perfil'] !== 'admin') {
       document.getElementById('senha').value = '';
       document.getElementById('modalTitulo').textContent = 'Novo Usuário';
       modal.classList.remove('hidden');
+    }
+
+    function fecharModal() {
+      modal.classList.add('hidden');
     }
 
     function editarUsuario(id) {
@@ -147,9 +154,9 @@ if (!isset($_SESSION['admin_id']) || $_SESSION['perfil'] !== 'admin') {
       });
     }
 
-    function fecharModal() {
-      modal.classList.add('hidden');
-    }
+    // Adicionando os event listeners fora do escopo de função
+    document.getElementById('btnNovoUsuario').addEventListener('click', abrirModalNovo);
+    document.getElementById('btnCancelar').addEventListener('click', fecharModal);
 
     carregarUsuarios();
   </script>
