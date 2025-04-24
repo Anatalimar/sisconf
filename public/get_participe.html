@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <title>Confirmação de Presença - DETIN</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
   <body class="bg-gray-100 text-gray-800 p-4">
     <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow p-6">
@@ -54,10 +55,23 @@
       </script>
 
       <!-- Descrição -->
-      <p class="text-center text-gray-600 mb-8">
-        A confraternização será em um espaço agradável, com muito verde, piscina
-        e área de lazer para todos aproveitarem esse momento especial.
-      </p>
+      <p class="text-center text-gray-600 mb-2"><b>🎉 Comunicado – Festa de Fim de Ano 2025 🎉</b></p>
+        <p class="text-center text-gray-600 mb-2"></p>  
+        <p class="text-center text-gray-600 mb-2">Prezados(as) colegas,</p>
+        <p class="text-center text-gray-600 mb-4">
+        É com grande entusiasmo que anunciamos nosso Jantar de Fim de Ano, que será realizado no dia 27 de dezembro (sábado), no Vidas Buffet.
+        Abaixo, seguem as informações importantes sobre o evento:</p>
+        <p class="text-center text-gray-600 mb-2">
+        💰 Valores de participação:</p>
+        <p class="text-center text-gray-600 mb-2">* Servidores: R$ 200,00</p>
+        <p class="text-center text-gray-600 mb-2">* Estagiários: R$ 120,00</p>
+        <p class="text-center text-gray-600 mb-2">* Acompanhantes: R$ 200,00</p>
+        <p class="text-center text-gray-600 mb-2">* Crianças:</p>
+        <p class="text-center text-gray-600 mb-2">◦ De 04 a 10 anos: R$ 100,00</p>
+        <p class="text-center text-gray-600 mb-2">◦ De 11 a 14 anos: R$ 120,00</p>  
+        <p class="text-center text-gray-600 mb-2">Os valores poderão ser parcelados em até 8 vezes, com início dos pagamentos previsto para abril/maio. O valor total deve estar quitado até, no máximo, novembro.</p>
+        <p class="text-center text-gray-600 mb-2">📢 Atenção: Solicitamos que todos os servidores manifestem seu interesse em participar o quanto antes, para que possamos organizar o evento da melhor forma possível.</p>
+        <p class="text-center text-gray-600 mb-4"></p>
 
       <!-- Formulário -->
       <form class="space-y-4" id="confirmacaoForm">
@@ -118,28 +132,146 @@
     </div>
 
     <script>
-      // Carrossel simples automático
-      const carousel = document.querySelector(".carousel");
-      let index = 0;
-      setInterval(() => {
-        index = (index + 1) % 3;
-        carousel.style.transform = `translateX(-${index * 100}%)`;
-      }, 3000);
+      document.addEventListener("DOMContentLoaded", () => {
+        const setorSelect = document.getElementById("setor");
+        const colaboradorSelect = document.getElementById("colaborador");
+        const participarSelect = document.getElementById("participar");
+        const acompanhantesWrapper = document.getElementById("acompanhantesWrapper");
+        const confirmacaoForm = document.getElementById("confirmacaoForm");
 
-      // Lógica de exibição do campo de acompanhantes
-      document
-        .getElementById("participar")
-        .addEventListener("change", function () {
-          const wrapper = document.getElementById("acompanhantesWrapper");
-          if (this.value === "sim") {
-            wrapper.classList.remove("hidden");
+        // Função para carregar setores
+        function carregarSetores() {
+          fetch("../backend/get_setores.php")
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Erro ao carregar setores");
+              }
+              return response.json();
+            })
+            .then((setores) => {
+              setores.forEach((setor) => {
+                const option = document.createElement("option");
+                option.value = setor;
+                option.textContent = setor;
+                setorSelect.appendChild(option);
+              });
+            })
+            .catch((error) => console.error("Erro:", error));
+        }
+
+        // Função para carregar colaboradores com base no setor selecionado
+        function carregarColaboradores(setorId) {
+          colaboradorSelect.innerHTML =
+            '<option value="">Selecione o nome</option>'; // Resetar opções
+
+          if (!setorId) return; // Não carregar se nenhum setor for selecionado
+
+          fetch(`../backend/get_colaboradores.php?setor=${encodeURIComponent(setorId)}`)
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Erro ao carregar colaboradores");
+              }
+              return response.json();
+            })
+            .then((colaboradores) => {
+              console.log("Colaboradores carregados:", colaboradores); // Log para depuração
+
+              if (colaboradores.error) {
+                console.error("Erro:", colaboradores.error);
+                return;
+              }
+
+              // Preencher o dropdown com os colaboradores
+              colaboradores.forEach((colaborador) => {
+                const option = document.createElement("option");
+                option.value = colaborador.id;
+                option.textContent = colaborador.nome;
+                colaboradorSelect.appendChild(option);
+              });
+            })
+            .catch((error) => console.error("Erro ao carregar colaboradores:", error));
+        }
+
+        // Evento para carregar colaboradores ao selecionar um setor
+        setorSelect.addEventListener("change", () => {
+          const setorId = setorSelect.value;
+          console.log("Setor selecionado:", setorId); // Log para depuração
+          carregarColaboradores(setorId);
+        });
+
+        // Evento para mostrar/ocultar o campo de acompanhantes
+        participarSelect.addEventListener("change", () => {
+          const participarValue = participarSelect.value;
+
+          if (participarValue === "sim") {
+            acompanhantesWrapper.classList.remove("hidden"); // Mostrar o campo
           } else {
-            wrapper.classList.add("hidden");
-            document.getElementById("acompanhantes").value = 0;
+            acompanhantesWrapper.classList.add("hidden"); // Ocultar o campo
           }
         });
 
-      // Futuro: carregar setores e colaboradores com fetch PHP (backend)
+        // Evento de envio do formulário
+        confirmacaoForm.addEventListener("submit", async (event) => {
+          event.preventDefault(); // Impedir o envio padrão do formulário
+
+          // Validar campos
+          const setor = setorSelect.value;
+          const colaborador = colaboradorSelect.value;
+          const participar = participarSelect.value;
+          const acompanhantes = document.getElementById("acompanhantes").value;
+
+          if (!setor || !colaborador || !participar) {
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: "Por favor, preencha todos os campos obrigatórios.",
+            });
+            return;
+          }
+
+          // Enviar os dados para o backend
+          try {
+            const response = await fetch("../backend/confirmar.php", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                colaborador_id: colaborador,
+                vai_participar: participar,
+                acompanhantes: acompanhantes,
+              }),
+            });
+
+            const result = await response.json();
+
+            if (result.status === "ok") {
+              Swal.fire({
+                icon: "success",
+                title: "Sucesso!",
+                text: "Sua confirmação foi enviada com sucesso!",
+              });
+
+              // Limpar o formulário
+              confirmacaoForm.reset();
+              setorSelect.innerHTML = '<option value="">Selecione um setor</option>';
+              colaboradorSelect.innerHTML = '<option value="">Selecione o nome</option>';
+              acompanhantesWrapper.classList.add("hidden");
+            } else {
+              throw new Error(result.message || "Erro ao gravar os dados.");
+            }
+          } catch (error) {
+            Swal.fire({
+              icon: "error",
+              title: "Erro!",
+              text: error.message || "Ocorreu um erro ao enviar sua confirmação. Tente novamente.",
+            });
+          }
+        });
+
+        // Carregar setores ao carregar a página
+        carregarSetores();
+      });
     </script>
   </body>
 </html>

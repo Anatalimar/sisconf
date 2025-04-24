@@ -6,7 +6,7 @@ $data = json_decode(file_get_contents("php://input"), true);
 $email = $data['email'] ?? '';
 $senha = $data['senha'] ?? '';
 
-$stmt = $pdo->prepare("SELECT id, senha_hash FROM usuarios_admin WHERE email = ?");
+$stmt = $conn->prepare("SELECT id, senha_hash FROM usuarios_admin WHERE email = ?");
 $stmt->execute([$email]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 

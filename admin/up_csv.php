@@ -1,6 +1,6 @@
 <?php
 $host = "localhost";
-$db = "sisconfi";
+$db = "sisconf";
 $user = "root";
 $pass = "";
 

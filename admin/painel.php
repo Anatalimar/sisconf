@@ -26,7 +26,7 @@ if (!isset($_SESSION['admin_id'])) {
         <button onclick="carregarConteudo('usuarios.php')" class="hover:bg-blue-800 px-3 py-2 rounded">Gerenciar Usuários</button>
       </div>
       <div>
-        <a href="logout.php" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm">Sair</a>
+        <a href="../backend/logout.php" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm">Sair</a>
       </div>
     </div>
   </nav>

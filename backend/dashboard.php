@@ -58,7 +58,7 @@
   </div>
 
   <script>
-    fetch('backend/dashboard_dados.php')
+    fetch('dashboard_dados.php')
       .then(res => res.json())
       .then(dados => {
         document.getElementById('total_colaboradores').textContent = dados.total_colaboradores;
