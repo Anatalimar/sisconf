@@ -18,7 +18,7 @@ try {
     $acompanhantes = (int) $data['acompanhantes'];
 
     // Preparar e executar a consulta
-    $stmt = $pdo->prepare("REPLACE INTO confirmacoes (colaborador_id, vai_participar, acompanhantes) VALUES (?, ?, ?)");
+    $stmt = $conn->prepare("REPLACE INTO confirmacoes (colaborador_id, vai_participar, acompanhantes) VALUES (?, ?, ?)");
     $stmt->execute([$colaborador_id, $vai_participar, $acompanhantes]);
 
     echo json_encode(['status' => 'ok']);

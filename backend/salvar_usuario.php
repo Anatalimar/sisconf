@@ -25,10 +25,10 @@ try {
     // Atualização
     if (!empty($senha)) {
       $hash = password_hash($senha, PASSWORD_DEFAULT);
-      $stmt = $pdo->prepare("UPDATE usuarios_admin SET nome = ?, email = ?, perfil = ?, senha_hash = ? WHERE id = ?");
+      $stmt = $conn->prepare("UPDATE usuarios_admin SET nome = ?, email = ?, perfil = ?, senha_hash = ? WHERE id = ?");
       $stmt->execute([$nome, $email, $perfil, $hash, $id]);
     } else {
-      $stmt = $pdo->prepare("UPDATE usuarios_admin SET nome = ?, email = ?, perfil = ? WHERE id = ?");
+      $stmt = $conn->prepare("UPDATE usuarios_admin SET nome = ?, email = ?, perfil = ? WHERE id = ?");
       $stmt->execute([$nome, $email, $perfil, $id]);
     }
   } else {
@@ -39,11 +39,11 @@ try {
       exit;
     }
     $hash = password_hash($senha, PASSWORD_DEFAULT);
-    $stmt = $pdo->prepare("INSERT INTO usuarios_admin (nome, email, perfil, senha_hash) VALUES (?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO usuarios_admin (nome, email, perfil, senha_hash) VALUES (?, ?, ?, ?)");
     $stmt->execute([$nome, $email, $perfil, $hash]);
   }
 
-  echo json_encode(['sucesso' => true]);
+  echo json_encode(['sucesso' => true, 'mensagem' => 'Operação realizada com sucesso']);
 } catch (PDOException $e) {
   http_response_code(500);
   echo json_encode(['erro' => 'Erro ao salvar: ' . $e->getMessage()]);

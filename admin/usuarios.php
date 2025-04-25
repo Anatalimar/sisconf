@@ -14,12 +14,14 @@ if (!isset($_SESSION['admin_id']) || $_SESSION['perfil'] !== 'admin') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gerenciar Usuários</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 <body class="bg-gray-100 text-gray-800">
   <div class="max-w-5xl mx-auto p-6">
     <h1 class="text-2xl font-bold mb-6">Usuários Administrativos</h1>
 
-    <!-- Alteração aqui: botão sem inline JS -->
     <button id="btnNovoUsuario" class="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
       Novo Usuário
     </button>
@@ -112,9 +114,14 @@ if (!isset($_SESSION['admin_id']) || $_SESSION['perfil'] !== 'admin') {
     }
 
     function editarUsuario(id) {
+      console.log(`Editando usuário com ID: ${id}`);
       fetch(`../backend/get_usuario.php?id=${id}`)
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error('Erro ao buscar usuário');
+          return res.json();
+        })
         .then(u => {
+          console.log('Dados do usuário recebidos:', u);
           document.getElementById('usuarioId').value = u.id;
           document.getElementById('nome').value = u.nome;
           document.getElementById('email').value = u.email;
@@ -122,41 +129,111 @@ if (!isset($_SESSION['admin_id']) || $_SESSION['perfil'] !== 'admin') {
           document.getElementById('senha').value = '';
           document.getElementById('modalTitulo').textContent = 'Editar Usuário';
           modal.classList.remove('hidden');
-        });
+        })
+        .catch(err => console.error('Erro ao editar usuário:', err));
     }
 
     function excluirUsuario(id) {
-      if (!confirm('Tem certeza que deseja excluir este usuário?')) return;
-      fetch(`../backend/excluir_usuario.php?id=${id}`)
-        .then(res => res.json())
-        .then(() => carregarUsuarios());
+      Swal.fire({
+        title: 'Tem certeza?',
+        text: "Você não poderá reverter isso!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Sim, excluir!',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`../backend/excluir_usuario.php?id=${id}`)
+            .then(res => res.json())
+            .then(() => {
+              carregarUsuarios();
+              Swal.fire(
+                'Excluído!',
+                'O usuário foi excluído com sucesso.',
+                'success'
+              );
+            })
+            .catch(err => {
+              console.error('Erro ao excluir usuário:', err);
+              Swal.fire(
+                'Erro!',
+                'Houve um problema ao excluir o usuário.',
+                'error'
+              );
+            });
+        }
+      });
     }
 
     form.onsubmit = e => {
       e.preventDefault();
-      const dados = {
-        id: document.getElementById('usuarioId').value,
-        nome: document.getElementById('nome').value,
-        email: document.getElementById('email').value,
-        perfil: document.getElementById('perfil').value,
-        senha: document.getElementById('senha').value
-      };
 
-      fetch('../backend/salvar_usuario.php', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(dados)
-      })
-      .then(res => res.json())
-      .then(() => {
-        fecharModal();
-        carregarUsuarios();
+      Swal.fire({
+        title: 'Salvar alterações?',
+        text: "Deseja salvar as alterações feitas?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#22c55e',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Sim, salvar!',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const dados = {
+            id: document.getElementById('usuarioId').value,
+            nome: document.getElementById('nome').value,
+            email: document.getElementById('email').value,
+            perfil: document.getElementById('perfil').value,
+            senha: document.getElementById('senha').value
+          };
+
+          fetch('../backend/salvar_usuario.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dados)
+          })
+            .then(res => res.json())
+            .then(() => {
+              fecharModal();
+              carregarUsuarios();
+              Swal.fire(
+                'Salvo!',
+                'As alterações foram salvas com sucesso.',
+                'success'
+              );
+            })
+            .catch(err => {
+              console.error('Erro ao salvar usuário:', err);
+              Swal.fire(
+                'Erro!',
+                'Houve um problema ao salvar as alterações.',
+                'error'
+              );
+            });
+        }
       });
-    }
+    };
 
-    // Adicionando os event listeners fora do escopo de função
     document.getElementById('btnNovoUsuario').addEventListener('click', abrirModalNovo);
-    document.getElementById('btnCancelar').addEventListener('click', fecharModal);
+
+    document.getElementById('btnCancelar').addEventListener('click', () => {
+      Swal.fire({
+        title: 'Cancelar edição?',
+        text: "As alterações não salvas serão perdidas.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Sim, cancelar!',
+        cancelButtonText: 'Continuar editando'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fecharModal();
+        }
+      });
+    });
 
     carregarUsuarios();
   </script>
