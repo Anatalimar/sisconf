@@ -122,44 +122,45 @@ if (!isset($_SESSION['admin_id'])) {
     }
 
     function filtrarTabela() {
-      const nomeFiltro = document.getElementById('filtroNome')?.value.toLowerCase() || '';
-      const setorFiltro = document.getElementById('filtroSetor')?.value || '';
+  const nomeFiltro = document.getElementById('filtroNome')?.value.toLowerCase() || '';
+  const setorFiltro = document.getElementById('filtroSetor')?.value || '';
 
-      const filtrados = dadosOriginal.filter(item =>
-        item.nome.toLowerCase().includes(nomeFiltro) &&
-        (setorFiltro === '' || item.setor === setorFiltro)
-      );
+  const filtrados = dadosOriginal.filter(item =>
+    item.nome.toLowerCase().includes(nomeFiltro) &&
+    (setorFiltro === '' || item.setor === setorFiltro)
+  );
 
-      const tbody = document.getElementById('tabelaPagamentos');
-      if (!tbody) return;
-      tbody.innerHTML = '';
+  const tbody = document.getElementById('tabelaPagamentos');
+  if (!tbody) return;
+  tbody.innerHTML = '';
 
-      filtrados.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="p-2 border">${item.nome}</td>
-          <td class="p-2 border">${item.setor}</td>
-          <td class="p-2 border">${item.participa}</td>
-          <td class="p-2 border">${item.acompanhantes}</td>
-          <td class="p-2 border">R$ ${item.total}</td>
-          <td class="p-2 border">R$ ${item.pago}</td>
-          <td class="p-2 border">R$ ${item.faltando}</td>
-          <td class="p-2 border">
-            <button onclick="registrarPagamento(${item.id})" class="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700 mr-1">Registrar</button>
-            <button onclick="abrirHistorico(${item.id}, '${item.nome}')" class="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700">Histórico</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
+  filtrados.forEach(item => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="p-2 border">${item.nome}</td>
+      <td class="p-2 border">${item.setor}</td>
+      <td class="p-2 border">${item.participa}</td>
+      <td class="p-2 border">${item.acompanhantes}</td>
+      <td class="p-2 border">R$ ${item.total}</td>
+      <td class="p-2 border">R$ ${item.pago}</td>
+      <td class="p-2 border">R$ ${item.faltando}</td>
+      <td class="p-2 border">
+        <button onclick="registrarPagamento(${item.id})" class="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700 mr-1">Registrar</button>
+        <button onclick="abrirHistorico(${item.id}, '${item.nome}')" class="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700">Histórico</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
 
-      const totalConfirmados = filtrados.filter(f => f.participa.trim() === 'Sim').length;
-      const totalPagamentos = filtrados.reduce((acc, cur) => acc + parseFloat(cur.pago.replace(',', '.')), 0);
-      const totalPendentes = filtrados.filter(f => parseFloat(f.faltando.replace(',', '.')) > 0).length;
+  // Atualizar estatísticas
+  const totalConfirmados = filtrados.filter(f => f.participa.trim() === 'Sim').length;
+  const totalPagamentos = filtrados.reduce((acc, cur) => acc + parseFloat(cur.pago.replace(',', '.')), 0);
+  const totalPendentes = filtrados.filter(f => parseFloat(f.faltando.replace(',', '.')) > 0).length;
 
-      document.getElementById('totalConfirmados').textContent = totalConfirmados;
-      document.getElementById('totalPagamentos').textContent = `R$ ${totalPagamentos.toFixed(2)}`;
-      document.getElementById('totalPendentes').textContent = totalPendentes;
-    }
+  document.getElementById('totalConfirmados').textContent = totalConfirmados;
+  document.getElementById('totalPagamentos').textContent = `R$ ${totalPagamentos.toFixed(2)}`;
+  document.getElementById('totalPendentes').textContent = totalPendentes;
+}
 
     function registrarPagamento(id) {
       document.getElementById('colaboradorId').value = id; // Preenche o ID do colaborador
@@ -183,6 +184,8 @@ if (!isset($_SESSION['admin_id'])) {
         return;
       }
 
+      console.log({ colaborador_id: colaboradorId, valor: valorFloat }); // Log dos dados enviados
+
       fetch('../backend/registrar_pagamento.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -190,12 +193,13 @@ if (!isset($_SESSION['admin_id'])) {
       })
         .then(res => res.json())
         .then(data => {
+          console.log(data); // Log da resposta do backend
           if (data.success) {
             alert('Pagamento registrado com sucesso!');
             fecharModalPagamento();
             carregarTabelaPagamentos(); // Atualiza a tabela após o registro
           } else {
-            alert('Erro ao registrar o pagamento. Por favor, tente novamente.');
+            alert(`Erro: ${data.error}`);
           }
         })
         .catch(err => {

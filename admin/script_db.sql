@@ -12,7 +12,10 @@ CREATE TABLE confirmacoes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     colaborador_id INT NOT NULL,
     vai_participar BOOLEAN NOT NULL,
-    acompanhantes INT DEFAULT 0,
+    acompanhante18 INT DEFAULT 0,
+    acompanhante17a11 INT DEFAULT 0,
+    acompanhante10a04 INT DEFAULT 0,
+    valor_pagar DECIMAL(10, 2) NOT NULL, -- Valor a pagar (considerando acompanhantes)
     data_confirmacao DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (colaborador_id) REFERENCES colaboradores(id) ON DELETE CASCADE
 );

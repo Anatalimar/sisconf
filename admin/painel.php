@@ -46,6 +46,7 @@ if (!isset($_SESSION['admin_id']) || $_SESSION['perfil'] !== 'admin') {
                 <ul class="flex space-x-4">
                     <li><a href="painel.php" class="hover:underline">Início</a></li>
                     <li><a href="painel.php?pagina=usuarios" class="hover:underline">Usuários</a></li>
+                    <li><a href="painel.php?pagina=admin_parcelas" class="hover:underline">Gerenciar Parcelas</a></li>
                     <li><a href="painel.php?pagina=relatorios" class="hover:underline">Relatórios</a></li>
                     <li><a href="logout.php" class="hover:underline">Sair</a></li>
                 </ul>

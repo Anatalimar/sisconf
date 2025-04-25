@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Registra o pagamento
     $sql = "INSERT INTO pagamentos_parcelas (parcela_id, valor_pago, data_pagamento) VALUES (?, ?, ?)";
-    $stmt = $pdo->prepare($sql);
+    $stmt = $conn->prepare($sql);
     $stmt->execute([$parcela_id, $valor_pago, $data_pagamento]);
 
     echo json_encode(['status' => 'success', 'message' => 'Pagamento registrado com sucesso']);
