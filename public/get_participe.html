@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
   <head>
@@ -73,35 +74,29 @@
         <p class="text-center text-gray-600 mb-2">📢 Atenção: Solicitamos que todos os servidores manifestem seu interesse em participar o quanto antes, para que possamos organizar o evento da melhor forma possível.</p>
         <p class="text-center text-gray-600 mb-4"></p>
 
-      <!-- Formulário -->
       <form class="space-y-4" id="confirmacaoForm">
         <div>
           <label class="block mb-1 font-semibold">Setor:</label>
           <select id="setor" class="w-full border rounded px-3 py-2" required>
             <option value="">Selecione um setor</option>
-            <!-- Preenchido dinamicamente -->
           </select>
         </div>
 
         <div>
           <label class="block mb-1 font-semibold">Nome:</label>
-          <select
-            id="colaborador"
-            class="w-full border rounded px-3 py-2"
-            required
-          >
+          <select id="colaborador" class="w-full border rounded px-3 py-2" required>
             <option value="">Selecione o nome</option>
-            <!-- Preenchido após seleção do setor -->
           </select>
+        </div>
+
+        <div id="tipoContratacaoWrapper" class="hidden">
+          <label class="block mb-1 font-semibold">Tipo de Contratação:</label>
+          <input id="tipoContratacao" type="text" class="w-full border rounded px-3 py-2 bg-gray-100" readonly />
         </div>
 
         <div>
           <label class="block mb-1 font-semibold">Você irá participar?</label>
-          <select
-            id="participar"
-            class="w-full border rounded px-3 py-2"
-            required
-          >
+          <select id="participar" class="w-full border rounded px-3 py-2" required>
             <option value="">Selecione</option>
             <option value="sim">Sim</option>
             <option value="nao">Não</option>
@@ -109,23 +104,20 @@
         </div>
 
         <div id="acompanhantesWrapper" class="hidden">
-          <label class="block mb-1 font-semibold"
-            >Quantidade de acompanhantes:</label
-          >
-          <input
-            type="number"
-            id="acompanhantes"
-            min="0"
-            max="10"
-            class="w-full border rounded px-3 py-2"
-            value="0"
-          />
+          <label class="block mb-1 font-semibold">Acompanhantes maiores de 18 anos:</label>
+          <input type="number" id="acomp_18" min="0" max="10" value="0" class="w-full border rounded px-3 py-2" />
+
+          <label class="block mb-1 font-semibold mt-2">Acompanhantes de 11 a 17 anos:</label>
+          <input type="number" id="acomp_11_17" min="0" max="10" value="0" class="w-full border rounded px-3 py-2" />
+
+          <label class="block mb-1 font-semibold mt-2">Acompanhantes de 04 a 10 anos:</label>
+          <input type="number" id="acomp_4_10" min="0" max="10" value="0" class="w-full border rounded px-3 py-2" />
+
+          <label class="block mb-1 font-semibold mt-4">Total a Pagar:</label>
+          <input type="text" id="total" readonly class="w-full border rounded px-3 py-2 bg-gray-100 font-bold" />
         </div>
 
-        <button
-          type="submit"
-          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
           Confirmar
         </button>
       </form>
@@ -135,19 +127,32 @@
       document.addEventListener("DOMContentLoaded", () => {
         const setorSelect = document.getElementById("setor");
         const colaboradorSelect = document.getElementById("colaborador");
+        const tipoContratacaoInput = document.getElementById("tipoContratacao");
+        const tipoContratacaoWrapper = document.getElementById("tipoContratacaoWrapper");
         const participarSelect = document.getElementById("participar");
-        const acompanhantesWrapper = document.getElementById("acompanhantesWrapper");
         const confirmacaoForm = document.getElementById("confirmacaoForm");
+        const acompanhantesWrapper = document.getElementById("acompanhantesWrapper");
+        const acomp18 = document.getElementById("acomp_18");
+        const acomp11_17 = document.getElementById("acomp_11_17");
+        const acomp4_10 = document.getElementById("acomp_4_10");
+        const totalInput = document.getElementById("total");
 
-        // Função para carregar setores
+        function calcularTotal() {
+          let tipo = tipoContratacaoInput.value;
+          let base = tipo === "Estagiário" ? 120 : 200;
+          let v18 = 200 * parseInt(acomp18.value || 0);
+          let v11_17 = 120 * parseInt(acomp11_17.value || 0);
+          let v4_10 = 100 * parseInt(acomp4_10.value || 0);
+          totalInput.value = `R$ ${(base + v18 + v11_17 + v4_10).toFixed(2).replace(".", ",")}`;
+        }
+
+        [acomp18, acomp11_17, acomp4_10].forEach((el) => {
+          el.addEventListener("input", calcularTotal);
+        });
+
         function carregarSetores() {
           fetch("../backend/get_setores.php")
-            .then((response) => {
-              if (!response.ok) {
-                throw new Error("Erro ao carregar setores");
-              }
-              return response.json();
-            })
+            .then((r) => r.json())
             .then((setores) => {
               setores.forEach((setor) => {
                 const option = document.createElement("option");
@@ -155,8 +160,7 @@
                 option.textContent = setor;
                 setorSelect.appendChild(option);
               });
-            })
-            .catch((error) => console.error("Erro:", error));
+            });
         }
 
         // Função para carregar colaboradores com base no setor selecionado
@@ -199,77 +203,59 @@
           carregarColaboradores(setorId);
         });
 
-        // Evento para mostrar/ocultar o campo de acompanhantes
+        setorSelect.addEventListener("change", () => {
+          carregarColaboradores(setorSelect.value);
+        });
+
+        colaboradorSelect.addEventListener("change", () => {
+          const selected = colaboradorSelect.selectedOptions[0];
+          const tipo = selected?.dataset?.tipo || "";
+          if (tipo) {
+            tipoContratacaoInput.value = tipo;
+            tipoContratacaoWrapper.classList.remove("hidden");
+            calcularTotal();
+          }
+        });
+
         participarSelect.addEventListener("change", () => {
-          const participarValue = participarSelect.value;
-
-          if (participarValue === "sim") {
-            acompanhantesWrapper.classList.remove("hidden"); // Mostrar o campo
+          if (participarSelect.value === "sim") {
+            acompanhantesWrapper.classList.remove("hidden");
+            calcularTotal();
           } else {
-            acompanhantesWrapper.classList.add("hidden"); // Ocultar o campo
+            acompanhantesWrapper.classList.add("hidden");
+            totalInput.value = "";
           }
         });
 
-        // Evento de envio do formulário
-        confirmacaoForm.addEventListener("submit", async (event) => {
-          event.preventDefault(); // Impedir o envio padrão do formulário
+        confirmacaoForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const dados = {
+            colaborador_id: colaboradorSelect.value,
+            vai_participar: participarSelect.value,
+            tipo_contratacao: tipoContratacaoInput.value,
+            acomp_18: acomp18.value,
+            acomp_11_17: acomp11_17.value,
+            acomp_4_10: acomp4_10.value
+          };
 
-          // Validar campos
-          const setor = setorSelect.value;
-          const colaborador = colaboradorSelect.value;
-          const participar = participarSelect.value;
-          const acompanhantes = document.getElementById("acompanhantes").value;
+          const response = await fetch("../backend/confirmar.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dados)
+          });
+          const result = await response.json();
 
-          if (!setor || !colaborador || !participar) {
-            Swal.fire({
-              icon: "error",
-              title: "Oops...",
-              text: "Por favor, preencha todos os campos obrigatórios.",
-            });
-            return;
-          }
-
-          // Enviar os dados para o backend
-          try {
-            const response = await fetch("../backend/confirmar.php", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                colaborador_id: colaborador,
-                vai_participar: participar,
-                acompanhantes: acompanhantes,
-              }),
-            });
-
-            const result = await response.json();
-
-            if (result.status === "ok") {
-              Swal.fire({
-                icon: "success",
-                title: "Sucesso!",
-                text: "Sua confirmação foi enviada com sucesso!",
-              });
-
-              // Limpar o formulário
-              confirmacaoForm.reset();
-              setorSelect.innerHTML = '<option value="">Selecione um setor</option>';
-              colaboradorSelect.innerHTML = '<option value="">Selecione o nome</option>';
-              acompanhantesWrapper.classList.add("hidden");
-            } else {
-              throw new Error(result.message || "Erro ao gravar os dados.");
-            }
-          } catch (error) {
-            Swal.fire({
-              icon: "error",
-              title: "Erro!",
-              text: error.message || "Ocorreu um erro ao enviar sua confirmação. Tente novamente.",
-            });
+          if (result.status === "ok") {
+            Swal.fire("Sucesso!", "Sua confirmação foi enviada!", "success");
+            confirmacaoForm.reset();
+            tipoContratacaoWrapper.classList.add("hidden");
+            acompanhantesWrapper.classList.add("hidden");
+            totalInput.value = "";
+          } else {
+            Swal.fire("Erro!", result.message || "Erro ao gravar os dados.", "error");
           }
         });
 
-        // Carregar setores ao carregar a página
         carregarSetores();
       });
     </script>
