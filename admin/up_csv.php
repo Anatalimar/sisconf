@@ -20,8 +20,9 @@ if (isset($_FILES['arquivo']['tmp_name'])) {
     while (($linha = fgetcsv($arquivo, 1000, ";")) !== FALSE) {
         $nome = $conn->real_escape_string($linha[0]);
         $setor = $conn->real_escape_string($linha[1]);
+        $contra = $conn->real_escape_string($linha[2]);
 
-        $sql = "INSERT INTO colaboradores (nome, setor) VALUES ('$nome', '$setor')";
+        $sql = "INSERT INTO colaboradores (nome, setor, contratacao) VALUES ('$nome', '$setor', '$contra' )";
         $conn->query($sql);
     }
 

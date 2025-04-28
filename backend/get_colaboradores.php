@@ -1,54 +1,25 @@
 <?php
 require 'db.php';
 
-$setor = $_GET['setor'] ?? '';
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
 
-// Ajuste da consulta para incluir o tipo de contratação
-$query = "
-    SELECT c.id, c.nome, c.tipo_contratacao
-    FROM colaboradores c
-    JOIN confirmacoes conf ON conf.colaborador_id = c.id
-    WHERE conf.vai_participar = 1
-";
+try {
+    $setor = $_GET['setor'] ?? '';
+    
+    if (empty($setor)) {
+        echo json_encode([]);
+        exit;
+    }
 
-if (!empty($setor)) {
-    $query .= " AND c.setor = ?";
-}
-
-$query .= " ORDER BY c.nome";
-
-$stmt = $conn->prepare($query);
-
-if (!empty($setor)) {
+    $stmt = $conn->prepare("SELECT id, nome, contratacao FROM colaboradores WHERE setor = ? ORDER BY nome");
     $stmt->execute([$setor]);
-} else {
-    $stmt->execute();
+    $colaboradores = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode($colaboradores);
+
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Erro no banco de dados: ' . $e->getMessage()]);
 }
-
-$colaboradores = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-echo json_encode($colaboradores);
-
-/*
-
-$setor = $_GET['setor'] ?? '';
-$confirmados = $_GET['confirmados'] ?? '';
-
-if ($confirmados == '1') {
-    // Retorna apenas colaboradores confirmados, ignorando o setor
-    $stmt = $conn->prepare("SELECT id, nome FROM colaboradores WHERE confirmou = 1 ORDER BY nome");
-    $stmt->execute();
-} elseif (!empty($setor)) {
-    // Retorna colaboradores de um setor específico
-    $stmt = $conn->prepare("SELECT id, nome FROM colaboradores WHERE setor = ? ORDER BY nome");
-    $stmt->execute([$setor]);
-} else {
-    // Retorna todos os colaboradores (sem filtro)
-    $stmt = $conn->query("SELECT id, nome FROM colaboradores ORDER BY nome");
-}
-
-$colaboradores = $stmt->fetchAll(PDO::FETCH_ASSOC);
-echo json_encode($colaboradores);
-
-*/
 ?>

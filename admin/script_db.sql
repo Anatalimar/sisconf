@@ -4,7 +4,7 @@ CREATE TABLE colaboradores (
     nome VARCHAR(100) NOT NULL,
     setor VARCHAR(100) NOT NULL,
     funcao VARCHAR(100) NOT NULL,
-    contratacao ENUM('efetivo', 'terceirizado', 'estagiario', 'outro') NOT NULL
+    contratacao ENUM('comissionado', 'efetivo', 'estagiario', 'terceirizado') NOT NULL
 );
 
 -- Confirmação de participação
