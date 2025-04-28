@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../backend/db.php'; // Faz a conexão usando $conn
+require_once 'assistentes/conexao.php'; // Faz a conexão usando $conn
 
 // Verifica se o usuário já está logado
 if (isset($_SESSION['usuario_logado'])) {

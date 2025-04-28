@@ -1,0 +1,43 @@
+$(document).ready(function() {
+    // Carregar conteúdo dinâmico
+    $(document).on('click', '.menu-link', function(e) {
+        e.preventDefault();
+        var page = $(this).data('page');
+        loadPage(page);
+    });
+
+    // Função para carregar páginas
+    function loadPage(page) {
+        $.ajax({
+            url: 'paginas/' + page + '.php',
+            method: 'GET',
+            beforeSend: function() {
+                $('#conteudo-principal').html('<div class="loading">Carregando...</div>');
+            },
+            success: function(data) {
+                $('#conteudo-principal').html(data);
+                // Atualiza a URL no navegador
+                history.pushState(null, null, '?pagina=' + page);
+            },
+            error: function() {
+                $('#conteudo-principal').html('<div class="alert alert-danger">Erro ao carregar a página.</div>');
+            }
+        });
+    }
+
+    // Carregar página inicial baseada na URL
+    function loadInitialPage() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var page = urlParams.get('pagina') || 'dashboard';
+        loadPage(page);
+    }
+
+    // Logout
+    $('#logout').click(function(e) {
+        e.preventDefault();
+        window.location.href = 'logout.php';
+    });
+
+    // Carrega a página inicial quando o documento estiver pronto
+    loadInitialPage();
+});

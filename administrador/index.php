@@ -1,7 +1,7 @@
 <?php
 session_start();
-if (!isset($_SESSION['usuario'])) {
-    header("Location: login.php");
+if (!isset($_SESSION['usuario_logado']) || $_SESSION['usuario_logado'] !== true) {
+    header('Location: login.php');
     exit();
 }
 ?>
@@ -14,31 +14,19 @@ if (!isset($_SESSION['usuario'])) {
     <link rel="stylesheet" href="assistentes/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <?php include 'paginas/header.php'; ?>
-        <?php include 'paginas/sidebar.php'; ?>
+        <?php include 'header.php'; ?>
+        <?php include 'sidebar.php'; ?>
         
         <main class="main-content">
-            <?php
-            $pagina = isset($_GET['pagina']) ? $_GET['pagina'] : 'dashboard';
-            $paginas_validas = [
-                'dashboard', 'usuarios', 'colaboradores', 'pagamentos',
-                'relatorio-usuarios', 'relatorio-colaboradores', 'relatorio-pagamentos'
-            ];
-            
-            if (in_array($pagina, $paginas_validas)) {
-                include "paginas/{$pagina}.php";
-            } else {
-                include "paginas/dashboard.php";
-            }
-            ?>
+            <!-- O conteúdo será carregado aqui via AJAX -->
         </main>
     </div>
     
-    <?php include 'paginas/footer.php'; ?>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <?php include 'footer.php'; ?>
     <script src="assistentes/script.js"></script>
 </body>
 </html>
